@@ -199,7 +199,8 @@ class Service(object):
         func (function): the function to call.
         plus (object): additional data to pass to the function.
         seconds (float): the minimum interval between successive calls
-            (may be larger if a call doesn't return on time).
+            (may be larger if a call doesn't return on time). If
+            seconds is 0, the function will be called only once.
         immediately (bool): whether to call right off or wait also
             before the first call.
 
@@ -207,7 +208,9 @@ class Service(object):
         if plus is None:
             plus = {}
         func = functools.partial(func, **plus)
-        if immediately:
+        if seconds == 0:
+            gevent.spawn(func)
+        elif immediately:
             gevent.spawn(repeater, func, seconds)
         else:
             gevent.spawn_later(seconds, repeater, func, seconds)
