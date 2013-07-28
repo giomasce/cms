@@ -196,6 +196,20 @@ class Service(object):
     def add_timeout(self, func, plus, seconds, immediately=False):
         """Register a function to be called repeatedly.
 
+        The function is expected to return True or False. The service
+        will keep calling the function (after having waited the
+        specified time) as long as it returns True.
+
+        If immediately is True, the function will be called the first
+        time as soon as possible. If not, the service will perform an
+        initial wait of the specified time before calling the function
+        for the first time.
+
+        A special behavior takes place when seconds is 0: in such
+        case, the return value of the function is not monitored and
+        the function will be called exactly once. The immediately flag
+        is disregarded in this case.
+
         func (function): the function to call.
         plus (object): additional data to pass to the function.
         seconds (float): the minimum interval between successive calls
