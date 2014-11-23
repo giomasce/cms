@@ -214,7 +214,10 @@ Contest Web Server, logging in and randomly going over the available
 pages and downloading task statements. The random behavior of the
 users is described by laws and constants that are hardcoded in the
 script itself. See for example the variable ``DEFAULT_METRICS`` and
-the method ``RandomActor.act()``.
+the method ``RandomActor.act()``. The stress tester cannot actually
+emulate more users than there are in the contest. If you want to put
+additional work on your system, create some dummy users with AWS or
+launch more than one stress tester.
 
 If you do not provide the ``server_url`` argument, the script will try
 to guess it on its own (checking the configuration). If you specify
