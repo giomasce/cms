@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
-# Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
+# Copyright © 2010-2014 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
 # Copyright © 2010-2014 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2014 Artem Iglikov <artem.iglikov@gmail.com>
@@ -198,6 +198,18 @@ class Actor(threading.Thread):
 
 class RandomActor(Actor):
 
+    def __init__(self, username, password, metrics, tasks,
+                 log=None, base_url=None, submissions_path=None,
+                 submission_prob=None):
+        super(RandomActor, self).__init__(username, password,
+                                          metrics, tasks,
+                                          log=log,
+                                          base_url=base_url,
+                                          submissions_path=submissions_path)
+        if submission_prob is None:
+            submission_prob = 0.1
+        self.submission_prob = submission_prob
+
     def act(self):
         # Start with logging in and checking to be logged in
         self.do_step(HomepageRequest(self.browser,
@@ -217,13 +229,17 @@ class RandomActor(Actor):
         while True:
             choice = random.random()
             task = random.choice(self.tasks)
-            if choice < 0.1 and self.submissions_path is not None:
+            if choice < self.submission_prob and \
+                    self.submissions_path is not None:
                 self.do_step(SubmitRandomRequest(
                     self.browser,
                     task,
                     base_url=self.base_url,
                     submissions_path=self.submissions_path))
-            elif choice < 0.6 and task[2] != []:
+                continue
+
+            choice = random.random()
+            if choice < 0.6 and task[2] != []:
                 self.do_step(TaskStatementRequest(self.browser,
                                                   task[1],
                                                   random.choice(task[2]),
@@ -283,6 +299,10 @@ def main():
     parser.add_option("-r", "--read-from",
                       help="file to read contest info from",
                       action="store", default=None, dest="read_from")
+    parser.add_option("--submission-prob",
+                      help="probability of submitting a solution",
+                      action="store", type=float, default=None,
+                      dest="submission_prob")
     options = parser.parse_args()[0]
 
     # If prepare_path is specified we only need to save some useful
@@ -330,7 +350,8 @@ def main():
                           log=RequestLog(log_dir=os.path.join('./test_logs',
                                                               username)),
                           base_url=base_url,
-                          submissions_path=options.submissions_path)
+                          submissions_path=options.submissions_path,
+                          submission_prob=options.submission_prob)
               for username, data in users.iteritems()]
     for actor in actors:
         actor.start()
