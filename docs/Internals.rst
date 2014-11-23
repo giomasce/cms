@@ -240,7 +240,8 @@ do that you have to prepare a directory which has a directory for each
 task (name after that task). In each of the task directories you have
 to put some solutions for that task (at least one for each task). Then
 you have to specify the path of the main directory with the option
-``-S``.
+``-S``. It is not possible to send submissions with more than one file
+at the moment.
 
 You can terminate the stress testing with Ctrl-C. A concise summary of
 the number of successful and unsuccessful requests and the time to
