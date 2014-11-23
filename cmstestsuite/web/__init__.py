@@ -59,9 +59,9 @@ def browser_do_request(browser, url, data=None, files=None):
         else:
             response = browser.open(url, urllib.urlencode(data))
     else:
-        browser.form = HTMLForm(url,
-                                method='POST',
-                                enctype='multipart/form-data')
+        browser.form = HTMLForm(url.encode('utf-8'),
+                                method=b'POST',
+                                enctype=b'multipart/form-data')
         for key in sorted(data.keys()):
             # If the passed value is a list, we assume it is a list of
             # names of checkboxes that are checked.
@@ -115,7 +115,7 @@ class TestRequest(object):
             self.do_request()
 
         # Catch possible exceptions
-        except Exception as exc:
+        except Exception:
             self.exception_data = traceback.format_exc()
             self.outcome = TestRequest.OUTCOME_ERROR
 
@@ -129,7 +129,7 @@ class TestRequest(object):
         success = None
         try:
             success = self.test_success()
-        except Exception as exc:
+        except Exception:
             self.exception_data = traceback.format_exc()
             self.outcome = TestRequest.OUTCOME_ERROR
 
@@ -161,8 +161,8 @@ class TestRequest(object):
 
         # Otherwise report the exception
         else:
-            print("Request '%s' terminated with an exception: %s" %
-                  (description, repr(exc)), file=sys.stderr)
+            print("Request '%s' terminated with an exception:\n%s" %
+                  (description, self.exception_data), file=sys.stderr)
 
     def describe(self):
         raise NotImplementedError("Please subclass this class "
@@ -246,7 +246,8 @@ class GenericRequest(TestRequest):
                 res += "%s: %s\n" % (key, value)
             if self.browser.request.get_data() is not None:
                 res += "\nREQUEST DATA\n%s\n" % \
-                    (self.browser.request.get_data())
+                    (self.browser.request.get_data().decode('utf-8',
+                                                            errors='utf-8'))
             else:
                 res += "\nNO REQUEST DATA\n"
         else:
